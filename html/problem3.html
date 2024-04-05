@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+</head>
+<body>
+    <form id="todoForm">
+        <input type="text" id="taskTitle" placeholder="Task title">
+        <input type="text" id="taskDetails" placeholder="Task details (optional)">
+        <button type="button" onclick="addTask()">Add Task</button>
+    </form>
+    <ul id="taskList"></ul>
+
+    <script>
+        function addTask() {
+            const title = document.getElementById('taskTitle').value;
+            const details = document.getElementById('taskDetails').value;
+            const task = { title, details };
+            const listItem = document.createElement('li');
+            const titleElement = document.createElement('span');
+            titleElement.textContent = task.title;
+            listItem.appendChild(titleElement);
+            if (task.details) {
+                const detailsElement = document.createElement('span');
+                detailsElement.textContent = ` - ${task.details}`;
+                listItem.appendChild(detailsElement);
+            }
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Edit';
+            editButton.onclick = function() {
+                const newTitle = prompt('Enter new title:', task.title);
+                const newDetails = prompt('Enter new details:', task.details);
+                if (newTitle !== null) {
+                    task.title = newTitle;
+                    task.details = newDetails;
+                    titleElement.textContent = task.title;
+                    if (task.details) {
+                        if (!detailsElement) {
+                            const newDetailsElement = document.createElement('span');
+                            newDetailsElement.textContent = ` - ${task.details}`;
+                            listItem.appendChild(newDetailsElement);
+                        } else {
+                            detailsElement.textContent = ` - ${task.details}`;
+                        }
+                    } else {
+                        if (detailsElement) {
+                            detailsElement.remove();
+                        }
+                    }
+                }
+            };
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() {
+                listItem.remove();
+            };
+            listItem.appendChild(editButton);
+            listItem.appendChild(deleteButton);
+            document.getElementById('taskList').appendChild(listItem);
+        }
+    </script>
+</body>
+</html>
