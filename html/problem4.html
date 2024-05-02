@@ -44,7 +44,9 @@
                 usernameError.textContent = '';
             }
 
-            if (!emailInput.value.includes('@')) {
+            // Email validation with regex
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(emailInput.value)) {
                 emailError.textContent = 'Invalid email format.';
                 valid = false;
             } else {

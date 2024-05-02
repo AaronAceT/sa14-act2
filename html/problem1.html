@@ -6,54 +6,93 @@
     <title>Weather Dashboard</title>
 </head>
 <body>
-    <form id="weatherForm">
-        <input type="text" id="cityInput" placeholder="Enter city name">
-        <button type="submit">Get Weather</button>
-    </form>
-    <div id="weatherInfo">
-        <p id="currentTime"></p>
-        <p id="currentTemp"></p>
-        <p id="weatherCondition"></p>
-        <p id="humidity"></p>
-        <div id="forecast"></div>
+    <div class="container">
+        <header class="header">
+            <h1>Weather Dashboard</h1>
+        </header>
+        
+        <main class="main-content">
+            <form id="weather-form" class="weather-form">
+                <input type="text" id="city-name" class="input-field" placeholder="Enter city name" required>
+                <button type="submit" class="submit-btn">Get Weather</button>
+            </form>
+
+            <section id="current-weather" class="weather-section">
+                <h2>Current Weather</h2>
+                <div class="weather-info">
+                    <div id="current-time" class="time"></div>
+                    <div id="current-temperature" class="temperature"></div>
+                    <img id="current-condition-icon" class="condition-icon" alt="Weather Condition Icon">
+                    <div id="current-humidity" class="humidity"></div>
+                </div>
+            </section>
+
+            <section id="forecast" class="forecast-section">
+                <h2>5-Day Forecast</h2>
+                <div id="forecast-days" class="forecast-days"></div>
+            </section>
+        </main>
     </div>
 
     <script>
-        // JavaScript code to fetch weather data and update the dashboard
-        // This script uses Fetch API to make HTTP requests
+        const apiKey = 'b5ea4a8e140e4d66ad915201240205';
+        const form = document.getElementById('weather-form');
+        const cityNameInput = document.getElementById('city-name');
+        const currentWeatherDiv = document.getElementById('current-weather');
+        const forecastDiv = document.getElementById('forecast-days');
 
-        const weatherForm = document.getElementById('weatherForm');
-        const cityInput = document.getElementById('cityInput');
-        const currentTime = document.getElementById('currentTime');
-        const currentTemp = document.getElementById('currentTemp');
-        const weatherCondition = document.getElementById('weatherCondition');
-        const humidity = document.getElementById('humidity');
-        const forecast = document.getElementById('forecast');
-
-        weatherForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const city = cityInput.value;
-
-            fetch(`https://api.weatherapi.com/v1/current.json?key=2e20e95730ee4defa6c13233240504&q=${city}`)
-                .then(response => response.json())
-                .then(data => {
-                    currentTime.textContent = `Current time: ${data.location.localtime}`;
-                    currentTemp.textContent = `Current temperature: ${data.current.temp_c}°C`;
-                    weatherCondition.textContent = `Weather: ${data.current.condition.text}`;
-                    humidity.textContent = `Humidity: ${data.current.humidity}%`;
-                });
-
-            fetch(`https://api.weatherapi.com/v1/forecast.json?key=YOUR_API_KEY&q=${city}&days=5`)
-                .then(response => response.json())
-                .then(data => {
-                    forecast.innerHTML = '';
-                    for (let day of data.forecast.forecastday) {
-                        const dayElement = document.createElement('div');
-                        dayElement.textContent = `${day.date}: ${day.day.condition.text}, High: ${day.day.maxtemp_c}°C, Low: ${day.day.mintemp_c}°C`;
-                        forecast.appendChild(dayElement);
-                    }
-                });
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const cityName = cityNameInput.value.trim();
+            if (cityName) {
+                try {
+                    const weatherData = await fetchWeatherData(cityName);
+                    displayWeatherData(weatherData);
+                } catch (error) {
+                    console.error('Error fetching weather data:', error);
+                }
+            }
         });
+
+        async function fetchWeatherData(cityName) {
+            const apiUrl = `http://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${cityName}&days=5`;
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error('Failed to fetch data');
+            }
+            return response.json();
+        }
+
+        function displayWeatherData(data) {
+            displayCurrentWeather(data.current, data.location);
+            displayForecast(data.forecast.forecastday);
+        }
+
+        function displayCurrentWeather(currentWeatherData, location) {
+            const { localtime, name } = location;
+            currentWeatherDiv.innerHTML = `
+                <h3>Current Weather in ${name}</h3>
+                <div>Time: ${localtime}</div>
+                <div>Temperature: ${currentWeatherData.temp_c}°C</div>
+                <div>Condition: ${currentWeatherData.condition.text}</div>
+                <div>Humidity: ${currentWeatherData.humidity}%</div>
+            `;
+        }
+
+        function displayForecast(forecastDays) {
+            forecastDiv.innerHTML = ''; // Clear existing forecast
+            forecastDays.forEach(day => {
+                const forecastDayDiv = document.createElement('div');
+                forecastDayDiv.className = 'forecast-day';
+                forecastDayDiv.innerHTML = `
+                    <h4>Date: ${day.date}</h4>
+                    <div>Condition: ${day.day.condition.text}</div>
+                    <div>Max Temp: ${day.day.maxtemp_c}°C</div>
+                    <div>Min Temp: ${day.day.mintemp_c}°C</div>
+                `;
+                forecastDiv.appendChild(forecastDayDiv);
+            });
+        }
     </script>
 </body>
 </html>
